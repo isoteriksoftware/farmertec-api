@@ -51,13 +51,10 @@ export const validationRules = {
         password: joi.string().min(6).required(),
     }),
     update: joi.object({
-        email: joi.string().email().max(50),
-        full_name: joi.string().max(100),
+        full_name: joi.string().min(2).max(100),
         phone: joi.string().min(11).max(15),
+        address: joi.string().max(500),
         password: joi.string().min(6),
-        confirm_password: joi.string().valid(joi.ref('password')),
-        gender: joi.string().valid('Male', 'Female'),
-        relationship: joi.string().valid('Single', 'Married', 'Divorced', 'Rather not say'),
     }),
     initiatePasswordReset: joi.object({
         email: joi.string().email().max(50).required(),
@@ -66,20 +63,6 @@ export const validationRules = {
         new_password: joi.string().min(6).required(),
         confirm_password: joi.string().required().valid(joi.ref('new_password')),
         verification_code: joi.string().required(),
-    }),
-    updateNextOfKin: joi.object({
-        full_name: joi.string().max(100),
-        phone: joi.string().min(11).max(15),
-        gender: joi.string().valid('Male', 'Female'),
-    }),
-    updateNotificationsSettings: joi.object({
-        allow_transaction_notifications: joi.boolean().valid(true, false),
-        allow_pool_notifications: joi.boolean().valid(true, false),
-    }),
-    transferTokens: joi.object({
-        token_type: joi.string().valid('FMB', 'BUSD').required(),
-        address: joi.string().required(),
-        amount: joi.number().greater(0).required(),
     }),
 };
 

@@ -10,7 +10,6 @@ import compression from 'compression';
 import routes from './routes/index.routes';
 import { UnauthorizedError } from 'express-jwt';
 import expressFileUpload from 'express-fileupload';
-import cron from 'node-cron';
 
 // Create express instance
 const app: Express = express();

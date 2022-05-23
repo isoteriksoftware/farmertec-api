@@ -44,10 +44,6 @@ export const createUser = async (req: Request, res: any, next: any) => {
       if (user)
         errors.push("This email address is already registered");
 
-      user = await User.findOne({ username: body.username });
-      if (user)
-        errors.push("This username is taken");
-
       if (errors.length > 0)
         return res.failValidationError(errors, "validation-error");
       
@@ -258,7 +254,8 @@ export const updateUser = async (req: Request, res: any, next: any) => {
       const fields = Object.keys(body);
       const updatedFields = updatableFields.filter(field => fields.indexOf(field) !== -1);
 
-      if (updatedFields.length === 0)
+      const isAvatarUploaded = isFileUploaded(req, 'avatar');
+      if (updatedFields.length === 0 && !isAvatarUploaded)
         return res.failNotFound('No updatable field provided', 'no-updatable-field');
 
       const user = req.user;
@@ -273,7 +270,7 @@ export const updateUser = async (req: Request, res: any, next: any) => {
       };
 
       // Check for avatar upload
-      if (isFileUploaded(req, 'avatar')) {
+      if (isAvatarUploaded) {
         const file = req.files.avatar;
         if (file.truncated)
           return res.failValidationError([`File size must not exceed ${process.env.MAX_FILE_SIZE_MB}MB`, 'validation-error']);
@@ -282,17 +279,17 @@ export const updateUser = async (req: Request, res: any, next: any) => {
         if (['png', 'jpg', 'jpeg'].indexOf(extension) === -1)
           return res.failValidationError(['Avatar must be an image file!'], 'invalid-avatar-file');
 
-        moveUploadedFile(file, 'avatars',
-          (fileName: string) => {
+        await moveUploadedFile(file, 'avatars',
+          async(fileName: string) => {
             user.avatar = fileName;
-            finalize();
+            await finalize();
           },
           () => {
             res.failServerError('Failed to upload avatar');
           });
       }
       else {
-        finalize();
+        await finalize();
       }
     });
   };

@@ -1,6 +1,5 @@
 import  bcrypt from 'bcrypt';
 import { Request } from 'express';
-import axios, { AxiosInstance } from 'axios';
 import path from 'path';
 import fs from 'fs';
 import randomString from 'random-string';
@@ -34,11 +33,13 @@ export const moveUploadedFile = async (file: any, savePath: string, onSucceed: (
     fs.mkdirSync(filesDir, { recursive: true });
   }
 
-  file.mv(path.join(filesDir, fileName), (error: any) => {
-    console.log(error);
-    if (error) onError();
-    else onSucceed(fileName);
-  });
+  try {
+    await file.mv(path.join(filesDir, fileName));
+    onSucceed(fileName);
+  } catch (err: any) {
+    console.log(err);
+    onError();
+  }
 };
 
 export const daysToTimestamp = (days: number) => days * 8.64e+7;
