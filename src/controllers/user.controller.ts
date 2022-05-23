@@ -43,6 +43,10 @@ export const createUser = async (req: Request, res: any, next: any) => {
       let user = await User.findOne({ email: body.email });
       if (user)
         errors.push("This email address is already registered");
+      
+      user = await User.findOne({ phone: body.phone });
+      if (user)
+        errors.push("This phone number is already registered");
 
       if (errors.length > 0)
         return res.failValidationError(errors, "validation-error");
@@ -279,14 +283,8 @@ export const updateUser = async (req: Request, res: any, next: any) => {
         if (['png', 'jpg', 'jpeg'].indexOf(extension) === -1)
           return res.failValidationError(['Avatar must be an image file!'], 'invalid-avatar-file');
 
-        await moveUploadedFile(file, 'avatars',
-          async(fileName: string) => {
-            user.avatar = fileName;
-            await finalize();
-          },
-          () => {
-            res.failServerError('Failed to upload avatar');
-          });
+        user.avatar = await moveUploadedFile(file, 'avatars');
+        await finalize();
       }
       else {
         await finalize();

@@ -21,9 +21,9 @@ export const isFileUploaded = (req: Request, fileName: string) => {
   return req.files && Object.keys(req.files).length !== 0 && req.files[fileName];
 };
 
-export const moveUploadedFile = async (file: any, savePath: string, onSucceed: (fileName: string) => void, onError: Function) => {
+export const moveUploadedFile = async (file: any, savePath: string) => {
   if (file.truncated) {
-    return onError();
+    return Promise.reject(new Error('File size exceeds allowed size'));
   }
   
   const extension = file.name.substring(file.name.lastIndexOf('.')) || '';
@@ -35,10 +35,10 @@ export const moveUploadedFile = async (file: any, savePath: string, onSucceed: (
 
   try {
     await file.mv(path.join(filesDir, fileName));
-    onSucceed(fileName);
+    return Promise.resolve(fileName);
   } catch (err: any) {
     console.log(err);
-    onError();
+    return Promise.reject(err);
   }
 };
 
